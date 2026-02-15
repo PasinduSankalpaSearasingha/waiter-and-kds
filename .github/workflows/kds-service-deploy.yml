@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_CONTAINER_REGISTRY: 'kdsandwaiter' # UPDATE THIS
+  AZURE_CONTAINER_REGISTRY: 'waiterandkds'
   CONTAINER_APP_NAME: 'kds-service'
   RESOURCE_GROUP: 'res_no_18'
 
