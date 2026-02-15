@@ -49,9 +49,14 @@ public class KitchenController {
      * 3. If failed then Return error (no Kafka event)
      */
     @PostMapping("/orders/{orderId}/ready")
-    public ResponseEntity<KitchenOrderResponse> markOrderReady(@PathVariable Long orderId) {
-        logger.info("POST /api/kitchen/orders/{}/ready - Marking order as READY", orderId);
-        KitchenOrderResponse updatedOrder = kitchenService.markOrderAsReady(orderId);
+    public ResponseEntity<KitchenOrderResponse> markOrderReady(
+            @PathVariable Long orderId,
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
+            @RequestHeader(value = "X-User-Id", required = false) String userId,
+            @RequestHeader(value = "X-Table-Id", required = false) String tableId) {
+        logger.info("POST /api/kitchen/orders/{}/ready - Marking order as READY (userId: {}, tableId: {})",
+                orderId, userId, tableId);
+        KitchenOrderResponse updatedOrder = kitchenService.markOrderAsReady(orderId, authHeader, userId, tableId);
         logger.info("Order {} marked as READY successfully", orderId);
         return ResponseEntity.ok(updatedOrder);
     }
@@ -60,9 +65,14 @@ public class KitchenController {
      * Change order status to PREPARING
      */
     @PostMapping("/orders/{orderId}/preparing")
-    public ResponseEntity<KitchenOrderResponse> markOrderPreparing(@PathVariable Long orderId) {
-        logger.info("POST /api/kitchen/orders/{}/preparing - Marking order as PREPARING", orderId);
-        KitchenOrderResponse updatedOrder = kitchenService.updateOrderStatus(orderId, "PREPARING");
+    public ResponseEntity<KitchenOrderResponse> markOrderPreparing(
+            @PathVariable Long orderId,
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
+            @RequestHeader(value = "X-User-Id", required = false) String userId,
+            @RequestHeader(value = "X-Table-Id", required = false) String tableId) {
+        logger.info("POST /api/kitchen/orders/{}/preparing - Marking order as PREPARING (userId: {}, tableId: {})",
+                orderId, userId, tableId);
+        KitchenOrderResponse updatedOrder = kitchenService.updateOrderStatus(orderId, "PREPARING", authHeader, userId, tableId);
         logger.info("Order {} marked as PREPARING successfully", orderId);
         return ResponseEntity.ok(updatedOrder);
     }
@@ -71,9 +81,14 @@ public class KitchenController {
      * Change order status to CREATED
      */
     @PostMapping("/orders/{orderId}/created")
-    public ResponseEntity<KitchenOrderResponse> markOrderCreated(@PathVariable Long orderId) {
-        logger.info("POST /api/kitchen/orders/{}/created - Marking order as CREATED", orderId);
-        KitchenOrderResponse updatedOrder = kitchenService.updateOrderStatus(orderId, "CREATED");
+    public ResponseEntity<KitchenOrderResponse> markOrderCreated(
+            @PathVariable Long orderId,
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
+            @RequestHeader(value = "X-User-Id", required = false) String userId,
+            @RequestHeader(value = "X-Table-Id", required = false) String tableId) {
+        logger.info("POST /api/kitchen/orders/{}/created - Marking order as CREATED (userId: {}, tableId: {})",
+                orderId, userId, tableId);
+        KitchenOrderResponse updatedOrder = kitchenService.updateOrderStatus(orderId, "CREATED", authHeader, userId, tableId);
         logger.info("Order {} marked as CREATED successfully", orderId);
         return ResponseEntity.ok(updatedOrder);
     }

@@ -13,19 +13,18 @@ spring:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
         spring.json.add.type.headers: false
-      topic:
-        order-ready: order-ready
+    topic:
+      order-ready: order-ready
 
-# Order Service - DIRECT ACCESS (Gateway not required for internal service communication)
+# Order Service - DIRECT ACCESS
 order-service:
   base-url: ${ORDER_SERVICE_BASE_URL:https://gateway-app.mangofield-91faac5e.southeastasia.azurecontainerapps.io/api/orders}
 
 # Polling Configuration
 polling:
-  interval-ms: 3000  # Poll Order Service every 3000ms (3 seconds)
+  interval-ms: 3000
 
-
-# Redis Configuration (OPTIONAL - Cache Only)
+# Redis Configuration (OPTIONAL)
 redis:
   enabled: ${REDIS_ENABLED:false}
   host: ${REDIS_HOST:localhost}

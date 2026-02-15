@@ -19,7 +19,7 @@ public class OrderReadyEvent implements Serializable {
     private Long orderId;
     private Long tableId;
     private List<OrderItem> items;
-    private LocalDateTime readyAt;
+    private LocalDateTime readyTime;
 
     @Data
     @NoArgsConstructor

@@ -1,0 +1,54 @@
+kind: containerapp
+location: southeastasia
+name: kafka-broker
+resourceGroup: res_no_18
+type: Microsoft.App/containerApps
+identity:
+  type: None
+properties:
+  managedEnvironmentId: <your-environment-id>
+  configuration:
+    activeRevisionsMode: Single
+    ingress:
+      external: true
+      targetPort: 9092
+      transport: tcp
+    registries:
+      - server: kdsandwaiter.azurecr.io
+        username: kdsandwaiter
+        passwordSecretRef: acr-password
+    secrets:
+      - name: acr-password
+        value: <your-acr-password>
+  template:
+    containers:
+      - image: confluentinc/cp-kafka:7.5.0
+        name: kafka-broker
+        env:
+          - name: KAFKA_NODE_ID
+            value: "1"
+          - name: KAFKA_PROCESS_ROLES
+            value: "broker,controller"
+          - name: KAFKA_CONTROLLER_QUORUM_VOTERS
+            value: "1@localhost:29093"
+          - name: KAFKA_LISTENERS
+            value: "PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:29093"
+          - name: KAFKA_ADVERTISED_LISTENERS
+            value: "PLAINTEXT://kafka-broker.southeastasia.azurecontainerapps.io:9092"
+          - name: KAFKA_CONTROLLER_LISTENER_NAMES
+            value: "CONTROLLER"
+          - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
+            value: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT"
+          - name: KAFKA_INTER_BROKER_LISTENER_NAME
+            value: "PLAINTEXT"
+          - name: CLUSTER_ID
+            value: "MkU3MzY1ODMyOTYyN0U3Mz"
+          - name: KAFKA_LOG_DIRS
+            value: "/var/lib/kafka/data"
+        volumeMounts:
+          - mountPath: /var/lib/kafka/data
+            volumeName: kafka-storage
+    volumes:
+      - name: kafka-storage
+        storageName: kafka-fileshare
+        storageType: AzureFile

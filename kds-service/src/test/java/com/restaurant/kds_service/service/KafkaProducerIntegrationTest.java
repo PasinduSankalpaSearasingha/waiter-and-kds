@@ -136,7 +136,7 @@ class KafkaProducerIntegrationTest {
         assertEquals("Caesar Salad", receivedItem2.getItemName());
         assertEquals(1, receivedItem2.getQuantity());
 
-        assertNotNull(receivedEvent.getReadyAt(), "Ready timestamp should be set");
+        assertNotNull(receivedEvent.getReadyTime(), "Ready timestamp should be set");
     }
 
     @Test

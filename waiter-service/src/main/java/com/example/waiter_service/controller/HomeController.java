@@ -1,13 +1,69 @@
 package com.example.waiter_service.controller;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.example.waiter_service.service.KafkaConsumerService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @RestController
 public class HomeController {
 
+    @Autowired
+    private KafkaConsumerService kafkaConsumerService;
+
     @GetMapping("/")
     public String home() {
         return "Waiter Service is running on port 8086!";
+    }
+
+    @GetMapping("/api/orders/latest")
+    public List<?> getLatestReceivedOrders() {
+        return kafkaConsumerService.getReceivedOrders();
+    }
+
+    @GetMapping("/api/orders/active")
+    public List<Map<String, Object>> getActiveOrders() {
+        Map<String, Object> order1 = new HashMap<>();
+        order1.put("id", 1L);
+        order1.put("tableId", 101L);
+        order1.put("status", "CREATED");
+        order1.put("createdAt", LocalDateTime.now());
+        order1.put("items", Arrays.asList(
+            createItem(1L, "BBQ Chicken Wings", 2),
+            createItem(2L, "French Fries", 1)
+        ));
+
+        Map<String, Object> order2 = new HashMap<>();
+        order2.put("id", 2L);
+        order2.put("tableId", 102L);
+        order2.put("status", "PREPARING");
+        order2.put("createdAt", LocalDateTime.now().minusMinutes(5));
+        order2.put("items", Arrays.asList(
+            createItem(3L, "Burgers", 1)
+        ));
+
+        return Arrays.asList(order1, order2);
+    }
+
+    @RequestMapping(value = "/api/orders/{orderId}/status", method = {RequestMethod.PATCH, RequestMethod.PUT, RequestMethod.POST})
+    public Map<String, Object> updateStatus(@PathVariable Long orderId, @RequestBody Map<String, String> body) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", orderId);
+        response.put("tableId", 100L + orderId);
+        response.put("status", body.getOrDefault("status", "READY"));
+        response.put("createdAt", LocalDateTime.now());
+        response.put("items", Arrays.asList(
+                createItem(orderId, "Mock Item " + orderId, 1)
+        ));
+        return response;
+    }
+
+    private Map<String, Object> createItem(Long id, String name, int qty) {
+        Map<String, Object> item = new HashMap<>();
+        item.put("id", id);
+        item.put("itemName", name);
+        item.put("quantity", qty);
+        return item;
     }
 }
