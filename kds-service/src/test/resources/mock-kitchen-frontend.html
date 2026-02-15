@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KDS Service - Mock Kitchen Display</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+        }
+
+        .status {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #4CAF50;
+            animation: pulse 2s infinite;
+        }
+
+        .status-indicator.error {
+            background: #f44336;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .controls h2 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .control-group label {
+            font-weight: 600;
+            color: #666;
+        }
+
+        .control-group input {
+            padding: 8px 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .btn-success {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #45a049;
+        }
+
+        .btn-danger {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #da190b;
+        }
+
+        .orders-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .order-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+
+        .order-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .order-id {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .order-status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-preparing {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-confirmed {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-created {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+
+        .order-info {
+            margin-bottom: 15px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            color: #666;
+        }
+
+        .info-label {
+            font-weight: 600;
+        }
+
+        .order-items {
+            margin-bottom: 15px;
+        }
+
+        .order-items h4 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px;
+            background: #f8f9fa;
+            margin-bottom: 5px;
+            border-radius: 5px;
+        }
+
+        .item-name {
+            font-weight: 500;
+        }
+
+        .item-details {
+            color: #666;
+        }
+
+        .ready-btn {
+            width: 100%;
+            padding: 12px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 8px;
+        }
+
+        .ready-btn:hover {
+            background: #45a049;
+            transform: scale(1.02);
+        }
+
+        .ready-btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: scale(1);
+        }
+
+        .status-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .status-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .status-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .status-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: scale(1);
+        }
+
+        .btn-created {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+
+        .btn-created:hover:not(:disabled) {
+            background: #d6d8db;
+        }
+
+        .btn-preparing {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .btn-preparing:hover:not(:disabled) {
+            background: #ffe69c;
+        }
+
+        .btn-ready {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-ready:hover:not(:disabled) {
+            background: #45a049;
+        }
+
+        .empty-state {
+            background: white;
+            padding: 60px 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .empty-state h2 {
+            color: #999;
+            margin-bottom: 10px;
+        }
+
+        .logs {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .logs h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .log-entry {
+            padding: 8px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        .log-info {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .log-success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .log-error {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .timestamp {
+            color: #666;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🍳 Kitchen Display System (Mock Frontend)</h1>
+            <div class="status">
+                <div id="statusIndicator" class="status-indicator"></div>
+                <span id="statusText">Connected</span>
+                <span id="orderCount">0 Orders</span>
+            </div>
+        </div>
+
+        <div class="controls">
+            <h2>⚙️ Configuration</h2>
+            <div class="control-group">
+                <label>KDS Service URL:</label>
+                <input type="text" id="kdsUrl" value="http://localhost:8085/api/kitchen" style="width: 300px;">
+
+                <label>Auto-Refresh:</label>
+                <input type="number" id="refreshInterval" value="3" min="1" max="30" style="width: 80px;">
+                <span>seconds</span>
+
+                <button class="btn btn-primary" onclick="fetchOrders()">🔄 Refresh Now</button>
+                <button class="btn btn-success" onclick="toggleAutoRefresh()">
+                    <span id="autoRefreshBtn">▶ Start Auto-Refresh</span>
+                </button>
+                <button class="btn btn-danger" onclick="clearLogs()">🗑️ Clear Logs</button>
+            </div>
+        </div>
+
+        <div id="ordersContainer" class="orders-grid"></div>
+
+        <div class="logs">
+            <h3>📋 Activity Logs</h3>
+            <div id="logsContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        let autoRefreshInterval = null;
+        let isAutoRefreshing = false;
+
+        function log(message, type = 'info') {
+            const logsContainer = document.getElementById('logsContainer');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${type}`;
+            logEntry.innerHTML = `<span class="timestamp">[${timestamp}]</span>${message}`;
+            logsContainer.insertBefore(logEntry, logsContainer.firstChild);
+
+            // Keep only last 50 logs
+            while (logsContainer.children.length > 50) {
+                logsContainer.removeChild(logsContainer.lastChild);
+            }
+        }
+
+        function updateStatus(isConnected, orderCount) {
+            const indicator = document.getElementById('statusIndicator');
+            const statusText = document.getElementById('statusText');
+            const orderCountEl = document.getElementById('orderCount');
+
+            if (isConnected) {
+                indicator.className = 'status-indicator';
+                statusText.textContent = 'Connected';
+            } else {
+                indicator.className = 'status-indicator error';
+                statusText.textContent = 'Error';
+            }
+
+            orderCountEl.textContent = `${orderCount} Order${orderCount !== 1 ? 's' : ''}`;
+        }
+
+        async function fetchOrders() {
+            const kdsUrl = document.getElementById('kdsUrl').value;
+            const ordersContainer = document.getElementById('ordersContainer');
+
+            log('Fetching active orders from KDS Service...', 'info');
+
+            try {
+                const response = await fetch(`${kdsUrl}/orders`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const orders = await response.json();
+                log(`✅ Successfully fetched ${orders.length} orders`, 'success');
+                updateStatus(true, orders.length);
+
+                if (orders.length === 0) {
+                    ordersContainer.innerHTML = `
+                        <div class="empty-state">
+                            <h2>✨ All Clear!</h2>
+                            <p>No active orders in the kitchen</p>
+                        </div>
+                    `;
+                } else {
+                    displayOrders(orders);
+                }
+            } catch (error) {
+                log(`❌ Error fetching orders: ${error.message}`, 'error');
+                updateStatus(false, 0);
+                ordersContainer.innerHTML = `
+                    <div class="empty-state">
+                        <h2>⚠️ Connection Error</h2>
+                        <p>${error.message}</p>
+                        <p>Make sure KDS Service is running on the configured URL</p>
+                    </div>
+                `;
+            }
+        }
+
+        function displayOrders(orders) {
+            const ordersContainer = document.getElementById('ordersContainer');
+
+            ordersContainer.innerHTML = orders.map(order => `
+                <div class="order-card">
+                    <div class="order-header">
+                        <div class="order-id">#${order.id}</div>
+                        <div class="order-status status-${order.status.toLowerCase()}">
+                            ${order.status}
+                        </div>
+                    </div>
+
+                    <div class="order-info">
+                        <div class="info-row">
+                            <span class="info-label">Table:</span>
+                            <span>${order.tableId}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Customer:</span>
+                            <span>User #${order.userId}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Total:</span>
+                            <span>$${order.totalAmount.toFixed(2)}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Created:</span>
+                            <span>${new Date(order.createdAt).toLocaleTimeString()}</span>
+                        </div>
+                    </div>
+
+                    <div class="order-items">
+                        <h4>📦 Items (${order.items.length})</h4>
+                        ${order.items.map(item => `
+                            <div class="item">
+                                <span class="item-name">${item.itemName}</span>
+                                <span class="item-details">
+                                    ${item.quantity}x @ $${item.unitPrice.toFixed(2)}
+                                </span>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="status-buttons">
+                        <button class="status-btn btn-created" onclick="changeOrderStatus(${order.id}, 'CREATED')" ${order.status === 'CREATED' ? 'disabled' : ''}>
+                            📝 CREATED
+                        </button>
+                        <button class="status-btn btn-preparing" onclick="changeOrderStatus(${order.id}, 'PREPARING')" ${order.status === 'PREPARING' ? 'disabled' : ''}>
+                            👨‍🍳 PREPARING
+                        </button>
+                        <button class="status-btn btn-ready" onclick="changeOrderStatus(${order.id}, 'READY')" ${order.status === 'READY' ? 'disabled' : ''}>
+                            ✅ READY
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function changeOrderStatus(orderId, newStatus) {
+            const kdsUrl = document.getElementById('kdsUrl').value;
+            const statusEndpoints = {
+                'CREATED': 'created',
+                'PREPARING': 'preparing',
+                'READY': 'ready'
+            };
+
+            const endpoint = statusEndpoints[newStatus];
+            if (!endpoint) {
+                log(`❌ Invalid status: ${newStatus}`, 'error');
+                return;
+            }
+
+            log(`Changing order #${orderId} status to ${newStatus}...`, 'info');
+
+            try {
+                const response = await fetch(`${kdsUrl}/orders/${orderId}/${endpoint}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+
+                const updatedOrder = await response.json();
+                log(`✅ Order #${orderId} status changed to ${newStatus} successfully!`, 'success');
+
+                if (newStatus === 'READY') {
+                    log(`📢 Kafka event published for order #${orderId}`, 'success');
+                }
+
+                // Refresh the orders list
+                setTimeout(() => fetchOrders(), 500);
+            } catch (error) {
+                log(`❌ Failed to change order #${orderId} status: ${error.message}`, 'error');
+                alert(`Error: ${error.message}`);
+            }
+        }
+
+        async function markOrderReady(orderId) {
+            const kdsUrl = document.getElementById('kdsUrl').value;
+
+            log(`Marking order #${orderId} as READY...`, 'info');
+
+            try {
+                const response = await fetch(`${kdsUrl}/orders/${orderId}/ready`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+
+                const updatedOrder = await response.json();
+                log(`✅ Order #${orderId} marked as READY successfully!`, 'success');
+                log(`📢 Kafka event published for order #${orderId}`, 'success');
+
+                // Refresh the orders list
+                setTimeout(() => fetchOrders(), 500);
+            } catch (error) {
+                log(`❌ Failed to mark order #${orderId} as READY: ${error.message}`, 'error');
+                alert(`Error: ${error.message}`);
+            }
+        }
+
+        function toggleAutoRefresh() {
+            const btn = document.getElementById('autoRefreshBtn');
+            const interval = parseInt(document.getElementById('refreshInterval').value) * 1000;
+
+            if (isAutoRefreshing) {
+                clearInterval(autoRefreshInterval);
+                btn.textContent = '▶ Start Auto-Refresh';
+                isAutoRefreshing = false;
+                log('Auto-refresh stopped', 'info');
+            } else {
+                autoRefreshInterval = setInterval(fetchOrders, interval);
+                btn.textContent = '⏸ Stop Auto-Refresh';
+                isAutoRefreshing = true;
+                log(`Auto-refresh started (every ${interval/1000}s)`, 'success');
+                fetchOrders(); // Fetch immediately
+            }
+        }
+
+        function clearLogs() {
+            document.getElementById('logsContainer').innerHTML = '';
+            log('Logs cleared', 'info');
+        }
+
+        // Initial load
+        window.addEventListener('load', () => {
+            log('🚀 Kitchen Display System initialized', 'success');
+            fetchOrders();
+        });
+    </script>
+</body>
+</html>
+

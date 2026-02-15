@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: waiter-service
+
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      group-id: waiter-group-v2
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+        spring.json.value.default.type: com.example.waiter_service.dto.OrderReadyEvent
+    topic:
+      order-ready: order-ready
+
+server:
+  port: 8086
+
+webhook:
+  url: ${WEBHOOK_URL:https://webhook.site/7b320857-4148-4363-8994-554477874747}
