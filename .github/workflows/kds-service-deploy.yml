@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'kds-service/**'
+      - '.github/workflows/kds-service-deploy.yml'
   workflow_dispatch:
 
 env:

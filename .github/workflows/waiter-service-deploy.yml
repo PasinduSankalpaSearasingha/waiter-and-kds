@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'waiter-service/**'
+      - '.github/workflows/waiter-service-deploy.yml'
   workflow_dispatch:
 
 env:
