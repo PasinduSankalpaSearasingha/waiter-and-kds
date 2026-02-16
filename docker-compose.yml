@@ -30,6 +30,7 @@ services:
     environment:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       WEBHOOK_URL: https://webhook.site/7b320857-4148-4363-8994-554477874747
+      SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL: PLAINTEXT
     depends_on:
       - kafka
 
@@ -41,6 +42,7 @@ services:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       # Point to waiter-service container for polling interactions
       ORDER_SERVICE_BASE_URL: https://gateway-app.mangofield-91faac5e.southeastasia.azurecontainerapps.io/api/orders
+      SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL: PLAINTEXT
     depends_on:
       - kafka
       - waiter-service

@@ -181,4 +181,10 @@ public class KitchenService {
                     order.getId(), e.getMessage());
         }
     }
+    /**
+     * Public method to publish test events directly
+     */
+    public void publishTestEvent(OrderReadyEvent event) {
+        kafkaPublisherService.publishOrderReadyEvent(event);
+    }
 }

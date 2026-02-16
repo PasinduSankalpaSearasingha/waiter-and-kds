@@ -1,29 +1,34 @@
 package com.example.waiter_service.controller;
 
+import com.example.waiter_service.dto.OrderReadyEvent;
 import com.example.waiter_service.service.KafkaConsumerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.*;
 
 @RestController
-public class HomeController {
+@RequestMapping("/api/waiter")
+@CrossOrigin(origins = "*")
+public class WaiterController {
 
     @Autowired
     private KafkaConsumerService kafkaConsumerService;
 
-    @GetMapping("/")
-    public String home() {
+    @GetMapping("/health")
+    public String health() {
         return "Waiter Service is running on port 8086!";
     }
 
-    @GetMapping("/api/orders/latest")
-    public List<?> getLatestReceivedOrders() {
-        return kafkaConsumerService.getReceivedOrders();
+    // Matches the user's requested URL: /api/waiter/received-orders
+    @GetMapping("/received-orders")
+    public ResponseEntity<List<OrderReadyEvent>> getReceivedOrders() {
+        return ResponseEntity.ok(kafkaConsumerService.getReceivedOrders());
     }
 
-    @GetMapping("/api/orders/active")
-    public List<Map<String, Object>> getActiveOrders() {
+    @GetMapping("/orders/active")
+    public ResponseEntity<List<Map<String, Object>>> getActiveOrders() {
         Map<String, Object> order1 = new HashMap<>();
         order1.put("id", 1L);
         order1.put("tableId", 101L);
@@ -43,11 +48,11 @@ public class HomeController {
             createItem(3L, "Burgers", 1)
         ));
 
-        return Arrays.asList(order1, order2);
+        return ResponseEntity.ok(Arrays.asList(order1, order2));
     }
 
-    @RequestMapping(value = "/api/orders/{orderId}/status", method = {RequestMethod.PATCH, RequestMethod.PUT, RequestMethod.POST})
-    public Map<String, Object> updateStatus(@PathVariable Long orderId, @RequestBody Map<String, String> body) {
+    @RequestMapping(value = "/orders/{orderId}/status", method = {RequestMethod.PATCH, RequestMethod.PUT, RequestMethod.POST})
+    public ResponseEntity<Map<String, Object>> updateStatus(@PathVariable Long orderId, @RequestBody Map<String, String> body) {
         Map<String, Object> response = new HashMap<>();
         response.put("id", orderId);
         response.put("tableId", 100L + orderId);
@@ -56,7 +61,7 @@ public class HomeController {
         response.put("items", Arrays.asList(
                 createItem(orderId, "Mock Item " + orderId, 1)
         ));
-        return response;
+        return ResponseEntity.ok(response);
     }
 
     private Map<String, Object> createItem(Long id, String name, int qty) {

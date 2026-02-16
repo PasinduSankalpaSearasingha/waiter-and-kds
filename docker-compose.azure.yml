@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  waiter-service:
+    build: ./waiter-service
+    ports:
+      - "8086:8086"
+    environment:
+      # No override needed for bootstrap servers as it's set in application.yaml
+      # SPRING_KAFKA_BOOTSTRAP_SERVERS is already configured in src/main/resources/application.yaml
+      WEBHOOK_URL: https://webhook.site/7b320857-4148-4363-8994-554477874747
+      # Ensure network connectivity to Azure
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kdswaiter.servicebus.windows.net:9093
+      SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL: SASL_SSL
+      SPRING_KAFKA_PROPERTIES_SASL_MECHANISM: PLAIN
+      # Use environment variable for connection string to simplify configuration
+      # The application.yaml already handles the JAAS config using this variable
+      AZURE_EVENTHUBS_CONNECTION_STRING: "Endpoint=sb://kdswaiter.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=<YOUR_SECRET_KEY>"
+      LOGGING_LEVEL_ORG_APACHE_KAFKA_COMMON_SECURITY: DEBUG
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  kds-service:
+    build: ./kds-service
+    ports:
+      - "8085:8085"
+    environment:
+      # No override needed for bootstrap servers
+      # Point to waiter-service container for polling interactions
+      ORDER_SERVICE_BASE_URL: https://gateway-app.mangofield-91faac5e.southeastasia.azurecontainerapps.io/api/orders
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kdswaiter.servicebus.windows.net:9093
+      SPRING_KAFKA_PROPERTIES_SECURITY_PROTOCOL: SASL_SSL
+      SPRING_KAFKA_PROPERTIES_SASL_MECHANISM: PLAIN
+      # Use environment variable for connection string to simplify configuration
+      # The application.yaml already handles the JAAS config using this variable
+      AZURE_EVENTHUBS_CONNECTION_STRING: "Endpoint=sb://kdswaiter.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=<YOUR_SECRET_KEY>"
+      LOGGING_LEVEL_ORG_APACHE_KAFKA_COMMON_SECURITY: DEBUG
+    depends_on:
+      - waiter-service
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
