@@ -27,3 +27,8 @@ server:
 
 webhook:
   url: ${WEBHOOK_URL:https://webhook.site/7b320857-4148-4363-8994-554477874747}
+
+logging:
+  level:
+    org.springframework.kafka: DEBUG
+    com.example.waiter_service: DEBUG
