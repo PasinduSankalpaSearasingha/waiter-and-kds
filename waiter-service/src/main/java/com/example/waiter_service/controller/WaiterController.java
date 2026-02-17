@@ -3,6 +3,8 @@ package com.example.waiter_service.controller;
 import com.example.waiter_service.dto.OrderReadyEvent;
 import com.example.waiter_service.service.KafkaConsumerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
+import org.springframework.kafka.listener.MessageListenerContainer;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
@@ -15,6 +17,19 @@ public class WaiterController {
 
     @Autowired
     private KafkaConsumerService kafkaConsumerService;
+
+    @Autowired
+    private KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry;
+
+    @GetMapping("/debug/kafka")
+    public ResponseEntity<Map<String, Object>> getKafkaStatus() {
+        Map<String, Object> status = new HashMap<>();
+        for (MessageListenerContainer container : kafkaListenerEndpointRegistry.getListenerContainers()) {
+            status.put(container.getListenerId(), container.isRunning());
+        }
+        status.put("listenerCount", kafkaListenerEndpointRegistry.getListenerContainers().size());
+        return ResponseEntity.ok(status);
+    }
 
     @GetMapping("/health")
     public String health() {
