@@ -31,6 +31,15 @@ public class KafkaProducerConfig {
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
         configProps.put(JsonSerializer.ADD_TYPE_INFO_HEADERS, false);
+
+        // SASL_SSL configuration for Azure Event Hubs
+        String jaasConfig = System.getenv("JAAS_CONFIG");
+        if (jaasConfig != null && !jaasConfig.isEmpty()) {
+            configProps.put("security.protocol", "SASL_SSL");
+            configProps.put("sasl.mechanism", "PLAIN");
+            configProps.put("sasl.jaas.config", jaasConfig);
+        }
+
         return new DefaultKafkaProducerFactory<>(configProps);
     }
 
