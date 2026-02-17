@@ -40,6 +40,8 @@ redis:
 # Logging
 logging:
   level:
-    com.restaurant.kds_service: INFO
-    org.springframework.kafka: INFO
-    org.apache.kafka: WARN
+    com.restaurant.kds_service: DEBUG
+    org.springframework.kafka: DEBUG
+    org.apache.kafka.clients: DEBUG
+    org.apache.kafka.common.security: DEBUG
+    org.apache.kafka.common.network: DEBUG
