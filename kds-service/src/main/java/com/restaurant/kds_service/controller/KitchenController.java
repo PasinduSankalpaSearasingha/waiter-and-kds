@@ -80,16 +80,16 @@ public class KitchenController {
     /**
      * Change order status to CREATED
      */
-    @PostMapping("/orders/{orderId}/created")
-    public ResponseEntity<KitchenOrderResponse> markOrderCreated(
+    @PostMapping("/orders/{orderId}/confirmed")
+    public ResponseEntity<KitchenOrderResponse> markOrderConfirmed(
             @PathVariable Long orderId,
             @RequestHeader(value = "Authorization", required = false) String authHeader,
             @RequestHeader(value = "X-User-Id", required = false) String userId,
             @RequestHeader(value = "X-Table-Id", required = false) String tableId) {
-        logger.info("POST /api/kitchen/orders/{}/created - Marking order as CREATED (userId: {}, tableId: {})",
+        logger.info("POST /api/kitchen/orders/{}/confirmed - Marking order as CONFIRMED (userId: {}, tableId: {})",
                 orderId, userId, tableId);
-        KitchenOrderResponse updatedOrder = kitchenService.updateOrderStatus(orderId, "CREATED", authHeader, userId, tableId);
-        logger.info("Order {} marked as CREATED successfully", orderId);
+        KitchenOrderResponse updatedOrder = kitchenService.updateOrderStatus(orderId, "CONFIRMED", authHeader, userId, tableId);
+        logger.info("Order {} marked as CONFIRMED successfully", orderId);
         return ResponseEntity.ok(updatedOrder);
     }
 
@@ -135,46 +135,4 @@ public class KitchenController {
         
         return ResponseEntity.ok(status);
     }
-    /**
-     * TEST ENDPOINT: Bypass Order Service and publish to Kafka directly
-     * Use this to verify Azure Event Hubs connection independently
-     */
-    @PostMapping("/test/orders/{orderId}/ready")
-    public ResponseEntity<String> testMarkOrderReady(
-            @PathVariable Long orderId,
-            @RequestParam(required = false, defaultValue = "1") Long tableId) {
-        
-        logger.info("TEST POST /api/kitchen/test/orders/{}/ready - Publishing dummy event", orderId);
-        
-        try {
-            // Create dummy items
-            java.util.List<com.restaurant.kds_service.dto.OrderReadyEvent.OrderItem> items = java.util.List.of(
-                new com.restaurant.kds_service.dto.OrderReadyEvent.OrderItem("Test Item 1", 2),
-                new com.restaurant.kds_service.dto.OrderReadyEvent.OrderItem("Test Item 2", 1)
-            );
-
-            com.restaurant.kds_service.dto.OrderReadyEvent event = new com.restaurant.kds_service.dto.OrderReadyEvent(
-                    orderId,
-                    tableId,
-                    items,
-                    java.time.LocalDateTime.now()
-            );
-
-            // Access the private service field via reflection or just make it public?
-            // Better: Expose a method in KitchenService or just inject KafkaPublisherService here?
-            // Actually, we can use the kitchenService to publish if we add a method there, OR
-            // we can just add KafkaPublisherService to this controller.
-            // Let's add KafkaPublisherService dependency to this controller to keep it simple for now.
-             
-             // Wait, modifying the constructor signature is a larger change.
-             // Let's add a public method to KitchenService that just publishes.
-             kitchenService.publishTestEvent(event);
-             
-            return ResponseEntity.ok("Test Kafka event published for Order " + orderId);
-        } catch (Exception e) {
-            logger.error("Failed to publish test event", e);
-            return ResponseEntity.internalServerError().body("Failed: " + e.getMessage());
-        }
-    }
 }
-
