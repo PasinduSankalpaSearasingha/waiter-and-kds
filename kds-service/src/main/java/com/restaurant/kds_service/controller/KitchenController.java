@@ -100,6 +100,41 @@ public class KitchenController {
     public ResponseEntity<String> health() {
         return ResponseEntity.ok("KDS Service is running");
     }
+
+    /**
+     * Debug endpoint: test order service connectivity and show config
+     */
+    @GetMapping("/debug/status")
+    public ResponseEntity<java.util.Map<String, Object>> debugStatus() {
+        java.util.Map<String, Object> status = new java.util.LinkedHashMap<>();
+        
+        // Show config
+        String jaas = System.getenv("JAAS_CONFIG");
+        if (jaas == null) {
+            status.put("JAAS_CONFIG", "NOT SET (null)");
+        } else if (jaas.isEmpty()) {
+            status.put("JAAS_CONFIG", "EMPTY STRING");
+        } else {
+            status.put("JAAS_CONFIG", jaas.substring(0, Math.min(60, jaas.length())) + "... (length=" + jaas.length() + ")");
+        }
+        status.put("BOOTSTRAP_SERVERS", System.getenv("SPRING_KAFKA_BOOTSTRAP_SERVERS"));
+        status.put("ORDER_SERVICE_BASE_URL", System.getenv("ORDER_SERVICE_BASE_URL"));
+        
+        // Show cached orders count
+        status.put("cachedOrdersCount", orderPollingService.getActiveOrders().size());
+        
+        // Test order service connectivity
+        try {
+            org.springframework.http.ResponseEntity<String> response = new org.springframework.web.client.RestTemplate()
+                .getForEntity("https://gateway-app.mangofield-91faac5e.southeastasia.azurecontainerapps.io/api/orders/active", String.class);
+            status.put("orderServiceStatus", response.getStatusCode().toString());
+            status.put("orderServiceResponseLength", response.getBody() != null ? response.getBody().length() : 0);
+        } catch (Exception e) {
+            status.put("orderServiceStatus", "ERROR: " + e.getMessage());
+        }
+        
+        return ResponseEntity.ok(status);
+    }
     /**
      * TEST ENDPOINT: Bypass Order Service and publish to Kafka directly
      * Use this to verify Azure Event Hubs connection independently
