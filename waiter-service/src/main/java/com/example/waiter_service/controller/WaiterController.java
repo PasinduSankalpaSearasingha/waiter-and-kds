@@ -32,6 +32,21 @@ public class WaiterController {
         status.put("receivedOrderCount", kafkaConsumerService.getReceivedOrders().size());
         status.put("errors", kafkaConsumerService.getErrors());
         status.put("rawMessages", kafkaConsumerService.getRawMessages());
+        
+        // JAAS_CONFIG diagnostic (masked for security)
+        String jaas = System.getenv("JAAS_CONFIG");
+        if (jaas == null) {
+            status.put("JAAS_CONFIG", "NOT SET (null)");
+        } else if (jaas.isEmpty()) {
+            status.put("JAAS_CONFIG", "EMPTY STRING");
+        } else {
+            // Show first 60 chars + length for verification without exposing the key
+            String masked = jaas.substring(0, Math.min(60, jaas.length())) + "... (length=" + jaas.length() + ")";
+            status.put("JAAS_CONFIG", masked);
+        }
+        
+        status.put("SPRING_KAFKA_BOOTSTRAP_SERVERS", System.getenv("SPRING_KAFKA_BOOTSTRAP_SERVERS"));
+        
         return ResponseEntity.ok(status);
     }
 
