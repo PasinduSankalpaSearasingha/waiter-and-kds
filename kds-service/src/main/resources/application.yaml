@@ -16,6 +16,9 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
+        security.protocol: SASL_SSL
+        sasl.mechanism: PLAIN
+        sasl.jaas.config: ${JAAS_CONFIG}
         spring.json.add.type.headers: false
     topic:
       order-ready: order-ready
