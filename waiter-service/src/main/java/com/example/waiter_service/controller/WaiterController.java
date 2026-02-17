@@ -28,6 +28,10 @@ public class WaiterController {
             status.put(container.getListenerId(), container.isRunning());
         }
         status.put("listenerCount", kafkaListenerEndpointRegistry.getListenerContainers().size());
+        status.put("messageCount", kafkaConsumerService.getMessageCount());
+        status.put("receivedOrderCount", kafkaConsumerService.getReceivedOrders().size());
+        status.put("errors", kafkaConsumerService.getErrors());
+        status.put("rawMessages", kafkaConsumerService.getRawMessages());
         return ResponseEntity.ok(status);
     }
 
